@@ -3,8 +3,8 @@
 cd "$(dirname "$0")/.."
 command -v termux-wake-lock >/dev/null && termux-wake-lock  # não deixa o Android "dormir" o Ultron
 
-PORTA=$(grep -E '^PORTA=' .env 2>/dev/null | cut -d= -f2); PORTA=${PORTA:-8000}
-NTFY=$(grep -E '^NTFY_TOPICO=' .env 2>/dev/null | cut -d= -f2)
+PORTA=$(grep -E '^PORTA=' .env 2>/dev/null | tail -1 | cut -d= -f2-); PORTA=${PORTA:-8000}
+NTFY=$(grep -E '^NTFY_TOPICO=' .env 2>/dev/null | tail -1 | cut -d= -f2-)
 
 trap 'kill 0' INT TERM  # Ctrl+C desliga tudo (servidor e túnel)
 
