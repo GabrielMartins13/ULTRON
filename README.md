@@ -1,6 +1,6 @@
 # U.L.T.R.O.N.
 
-Assistente pessoal de voz, inspirado no Ultron dos Vingadores (mas leal a você). Você conversa falando, como numa ligação, e ele responde em voz alta. Ele lembra o que você conta sobre você e consulta a previsão do tempo. Tudo roda num celular Android velho, que vira o servidor.
+Assistente pessoal de voz, inspirado no Ultron dos Vingadores (mas leal a você). Você conversa falando, como numa ligação, e ele responde em voz alta. Ele lembra o que você conta sobre você, pesquisa na internet (jogos, notícias, preços) e consulta a previsão do tempo. Tudo roda num celular Android velho, que vira o servidor.
 
 ```
  Seu celular (app no navegador)              Celular velho (Termux)                 Internet (grátis)
@@ -46,7 +46,7 @@ O celular velho não tem força pra rodar uma IA sozinho. Por isso o "pensar", o
 
 - Toque no orbe enquanto ele fala para **interromper**.
 - ⌨ escreve em vez de falar. 🧠 mostra o que ele lembra de você. ↻ começa outra conversa (a memória continua).
-- Exemplos: *"Ultron, lembra que a minha mãe faz aniversário dia 12 de março"*, *"Vai chover amanhã?"*, *"Esquece aquilo da academia"*.
+- Exemplos: *"Ultron, lembra que a minha mãe faz aniversário dia 12 de março"*, *"Vai chover amanhã?"*, *"Quando é o próximo jogo do Corinthians?"*, *"Esquece aquilo da academia"*.
 - Use fone de ouvido em lugar barulhento: ajuda ele a saber quando você terminou de falar.
 
 ### O endereço muda
@@ -69,6 +69,7 @@ Para ter um endereço fixo, dá pra usar um túnel nomeado do Cloudflare (precis
 | `DONO_NOME` | Como o Ultron te chama |
 | `LLM_URL`, `LLM_CHAVE`, `LLM_MODELO` | O cérebro. Padrão: Groq com `openai/gpt-oss-120b`. Também funciona com o Gemini (veja o `.env.example`) ou qualquer API compatível com OpenAI. |
 | `STT_CHAVE`, `STT_MODELO` | O ouvido (Whisper do Groq). Se ficar vazio e o cérebro for o Groq, usa a mesma chave. Sem chave do Groq, o app usa o reconhecimento de voz do navegador (funciona melhor no Chrome). |
+| `BUSCA_CHAVE`, `BUSCA_MODELO` | Pesquisa na web (modelo `groq/compound-mini`, grátis). Se ficar vazio e o cérebro for o Groq, usa a mesma chave. |
 | `VOZ`, `VOZ_VELOCIDADE`, `VOZ_TOM` | Voz neural da Microsoft. Masculina: `pt-BR-AntonioNeural`. Femininas: `pt-BR-FranciscaNeural` e `pt-BR-ThalitaMultilingualNeural`. O `VOZ_TOM` negativo deixa a voz mais grave, no estilo do Ultron. |
 | `CIDADE` | Cidade padrão do clima |
 | `NTFY_TOPICO` | Avisa o endereço novo pelo app ntfy |

@@ -32,7 +32,7 @@ def carregar_config():
             if linha and not linha.startswith("#") and "=" in linha:
                 k, v = linha.split("=", 1)
                 cfg[k.strip()] = v.strip().strip('"').strip("'")
-    cfg.update({k: v for k, v in os.environ.items() if k in cfg or k.startswith(("ULTRON_", "LLM_", "STT_"))})
+    cfg.update({k: v for k, v in os.environ.items() if k in cfg or k.startswith(("ULTRON_", "LLM_", "STT_", "BUSCA_"))})
     padroes = {
         "DONO_NOME": "chefe", "LLM_URL": "https://api.groq.com/openai/v1",
         "LLM_MODELO": "openai/gpt-oss-120b", "STT_MODELO": "whisper-large-v3-turbo",
@@ -45,6 +45,11 @@ def carregar_config():
     cfg["STT_URL"] = cfg.get("STT_URL") or "https://api.groq.com/openai/v1"
     if not cfg.get("STT_CHAVE") and "groq.com" in cfg["LLM_URL"]:
         cfg["STT_CHAVE"] = cfg.get("LLM_CHAVE", "")
+    # Pesquisa na web: modelo do Groq com busca embutida (mesma chave grátis)
+    cfg["BUSCA_URL"] = cfg.get("BUSCA_URL") or "https://api.groq.com/openai/v1"
+    cfg["BUSCA_MODELO"] = cfg.get("BUSCA_MODELO") or "groq/compound-mini"
+    if not cfg.get("BUSCA_CHAVE") and "groq.com" in cfg["LLM_URL"]:
+        cfg["BUSCA_CHAVE"] = cfg.get("LLM_CHAVE", "")
 
     faltando = [k for k in ("ULTRON_SENHA", "LLM_CHAVE") if not cfg.get(k)]
     if faltando:
@@ -159,5 +164,6 @@ if __name__ == "__main__":
     mimetypes.add_type("application/manifest+json", ".webmanifest")
     porta = int(CFG["PORTA"])
     print(f"Ultron online em http://localhost:{porta}  (cérebro: {CFG['LLM_MODELO']}, "
-          f"ouvido: {'Whisper' if CFG.get('STT_CHAVE') else 'navegador'}, voz: {CFG['VOZ']})")
+          f"ouvido: {'Whisper' if CFG.get('STT_CHAVE') else 'navegador'}, "
+          f"pesquisa: {'sim' if CFG.get('BUSCA_CHAVE') else 'não'}, voz: {CFG['VOZ']})")
     ThreadingHTTPServer(("0.0.0.0", porta), Handler).serve_forever()

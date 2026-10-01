@@ -46,6 +46,21 @@ FERRAMENTAS = [
     {
         "type": "function",
         "function": {
+            "name": "pesquisar_web",
+            "description": "Pesquisa na internet informações atuais ou que você não sabe: "
+                           "jogos e resultados de futebol, notícias, preços, cotações, "
+                           "eventos, lançamentos, horários de lugares, qualquer coisa que muda com o tempo.",
+            "parameters": {
+                "type": "object",
+                "properties": {"pergunta": {"type": "string",
+                                            "description": "O que pesquisar, numa frase completa e específica."}},
+                "required": ["pergunta"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "clima",
             "description": "Consulta o tempo agora e a previsão dos próximos dias numa cidade.",
             "parameters": {
@@ -115,6 +130,9 @@ class Cerebro:
         self.cfg = cfg
         self.memoria = Memoria(pasta_dados)
         self.trava = threading.Lock()
+        # A pesquisa usa um modelo do Groq com busca na web embutida; sem chave do Groq, fica desligada
+        self.ferramentas = [f for f in FERRAMENTAS
+                            if cfg.get("BUSCA_CHAVE") or f["function"]["name"] != "pesquisar_web"]
 
     # ---------- prompt ----------
     def _sistema(self):
@@ -132,7 +150,7 @@ Esta conversa é falada: o que você escrever será lido em voz alta.
 - Nunca use markdown, listas, emojis, asteriscos ou links. Escreva números e horas como se fala.
 - Se não entender o que foi dito (a transcrição pode ter erros), peça para repetir.
 - Quando {dono} contar algo pessoal que valha lembrar, use a ferramenta "lembrar" sem anunciar.
-- Não invente fatos. Se não souber, diga.
+- Não invente fatos. Para qualquer coisa atual (jogos, notícias, preços, eventos) use a ferramenta "pesquisar_web" em vez de dizer que não tem acesso. Se mesmo assim não souber, diga.
 
 Agora é {data}.
 
@@ -157,12 +175,25 @@ O que você sabe sobre {dono}:
                            "agora": dados.get("current"), "proximos_dias": dados.get("daily"),
                            "obs": "weather_code segue o padrão WMO"}, ensure_ascii=False)
 
+    def _pesquisar(self, pergunta):
+        hoje = datetime.now().strftime("%d/%m/%Y %H:%M")
+        resp = _http_json(self.cfg["BUSCA_URL"].rstrip("/") + "/chat/completions", {
+            "model": self.cfg["BUSCA_MODELO"],
+            "messages": [{"role": "user", "content":
+                          f"Agora é {hoje} (horário de Brasília). Pesquise na web e responda em "
+                          f"português do Brasil, de forma objetiva, com datas e horários quando houver: "
+                          f"{pergunta}"}],
+        }, {"Authorization": f"Bearer {self.cfg['BUSCA_CHAVE']}"}, timeout=90)
+        return (resp["choices"][0]["message"].get("content") or "Nada encontrado.")[:3000]
+
     def _executar(self, nome, args):
         try:
             if nome == "lembrar":
                 return self.memoria.lembrar(args.get("fato", ""))
             if nome == "esquecer":
                 return self.memoria.esquecer(args.get("trecho", ""))
+            if nome == "pesquisar_web":
+                return self._pesquisar(args.get("pergunta", ""))
             if nome == "clima":
                 return self._clima(args.get("cidade", ""))
             return f"Ferramenta desconhecida: {nome}"
@@ -174,7 +205,7 @@ O que você sabe sobre {dono}:
         resp = _http_json(self.cfg["LLM_URL"].rstrip("/") + "/chat/completions", {
             "model": self.cfg["LLM_MODELO"],
             "messages": mensagens,
-            "tools": FERRAMENTAS,
+            "tools": self.ferramentas,
             "temperature": 0.7,
             "max_tokens": 600,
         }, {"Authorization": f"Bearer {self.cfg['LLM_CHAVE']}"})
