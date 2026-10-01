@@ -150,6 +150,7 @@ Esta conversa é falada: o que você escrever será lido em voz alta.
 - Nunca use markdown, listas, emojis, asteriscos ou links. Escreva números e horas como se fala.
 - Se não entender o que foi dito (a transcrição pode ter erros), peça para repetir.
 - Quando {dono} contar algo pessoal que valha lembrar, use a ferramenta "lembrar" sem anunciar.
+- Você TEM acesso à internet pela ferramenta "pesquisar_web". Nunca diga que não tem acesso ou que precisa de permissão; pesquise.
 - Não invente fatos. Para qualquer coisa atual (jogos, notícias, preços, eventos) use a ferramenta "pesquisar_web" em vez de dizer que não tem acesso. Se mesmo assim não souber, diga.
 
 Agora é {data}.
@@ -235,8 +236,10 @@ O que você sabe sobre {dono}:
                         args = json.loads(c["function"].get("arguments") or "{}")
                     except ValueError:
                         args = {}
-                    novas.append({"role": "tool", "tool_call_id": c["id"],
-                                  "content": self._executar(c["function"]["name"], args)})
+                    resultado = self._executar(c["function"]["name"], args)
+                    print(f"  [ferramenta] {c['function']['name']}({json.dumps(args, ensure_ascii=False)})"
+                          f" -> {resultado[:300]}")
+                    novas.append({"role": "tool", "tool_call_id": c["id"], "content": resultado})
             else:
                 resposta = "Desculpe, me enrolei aqui. Pode repetir?"
             # Guarda só a fala final no histórico (ferramentas ficam de fora para economizar)

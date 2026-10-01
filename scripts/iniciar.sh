@@ -8,9 +8,26 @@ NTFY=$(grep -E '^NTFY_TOPICO=' .env 2>/dev/null | tail -1 | cut -d= -f2-)
 
 trap 'kill 0' INT TERM  # Ctrl+C desliga tudo (servidor e túnel)
 
-# Servidor: se cair, sobe de novo
-( while true; do python server.py; echo "Servidor caiu, reiniciando em 5s"; sleep 5; done ) &
+avisar() { [ -n "$NTFY" ] && curl -s -H "Title: $1" ${3:+-H "Click: $3"} -d "$2" "https://ntfy.sh/$NTFY" >/dev/null; }
+
+# Servidor: se cair (ou for reiniciado por uma atualização), sobe de novo
+( while true; do
+    python server.py & echo $! > .servidor.pid; wait $!
+    echo "Servidor reiniciando..."; sleep 2
+  done ) &
 sleep 2
+
+# Atualização automática: a cada 3 minutos procura novidades no GitHub. Se houver,
+# baixa e reinicia só o servidor; o túnel continua de pé, então o link não muda.
+( while true; do
+    sleep 180
+    git fetch -q origin 2>/dev/null || continue
+    if [ "$(git rev-parse HEAD)" != "$(git rev-parse '@{u}')" ] && git pull -q --ff-only; then
+      echo; echo "==> Atualizado: $(git log -1 --format=%s)"
+      kill "$(cat .servidor.pid)" 2>/dev/null
+      avisar "Ultron atualizado" "$(git log -1 --format=%s)" "$(cat endereco.txt 2>/dev/null)"
+    fi
+  done ) &
 
 # Túnel: o endereço muda cada vez que liga; mostramos aqui e (opcional) mandamos pelo ntfy
 while true; do
@@ -22,7 +39,7 @@ while true; do
       echo "  Ultron no ar:  $url"
       echo "=============================================="
       echo "$url" > endereco.txt
-      [ -n "$NTFY" ] && curl -s -H "Title: Ultron online" -H "Click: $url" -d "$url" "https://ntfy.sh/$NTFY" >/dev/null
+      avisar "Ultron online" "$url" "$url"
     fi
   done
   echo "Túnel caiu, reconectando em 5s"; sleep 5
