@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070405">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ultron">
+  <title>Ultron</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Entrada -->
+  <section id="tela-entrar" class="tela" hidden>
+    <form id="form-entrar" class="cartao">
+      <div class="marca">U.L.T.R.O.N.</div>
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password" required>
+      <button type="submit" class="botao">Entrar</button>
+      <p id="erro-entrar" class="erro" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- Conversa -->
+  <section id="tela-conversa" class="tela" hidden>
+    <header class="topo">
+      <span class="marca">U.L.T.R.O.N.</span>
+      <div class="acoes">
+        <button id="bt-teclado" class="icone" aria-label="Escrever em vez de falar" title="Escrever">
+          <svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>
+        </button>
+        <button id="bt-memoria" class="icone" aria-label="O que o Ultron lembra" title="Memória">
+          <svg viewBox="0 0 24 24"><path d="M12 5a3 3 0 0 0-5.8 1A3 3 0 0 0 4 11a3 3 0 0 0 1.5 5.2A3 3 0 0 0 12 18zm0 0a3 3 0 0 1 5.8 1A3 3 0 0 1 20 11a3 3 0 0 1-1.5 5.2A3 3 0 0 1 12 18z"/></svg>
+        </button>
+        <button id="bt-nova" class="icone" aria-label="Começar outra conversa" title="Nova conversa">
+          <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="palco">
+      <button id="orbe" class="orbe" aria-label="Ligar o Ultron">
+        <span class="anel a1"></span><span class="anel a2"></span><span class="anel a3"></span>
+        <span class="nucleo"></span>
+      </button>
+      <p id="estado" class="estado" aria-live="polite">Toque para ligar</p>
+      <div class="legenda">
+        <p id="ouvi" class="ouvi"></p>
+        <p id="resposta" class="resposta"></p>
+      </div>
+    </main>
+
+    <form id="form-texto" class="form-texto" hidden>
+      <input id="texto" placeholder="Escreva para o Ultron…" autocomplete="off">
+      <button class="botao" type="submit">Enviar</button>
+    </form>
+
+    <footer class="rodape">
+      <button id="bt-ligar" class="botao ligar">Ligar</button>
+    </footer>
+  </section>
+
+  <dialog id="dlg-memoria">
+    <h2>O que eu lembro</h2>
+    <ul id="lista-memoria"></ul>
+    <p class="dica">Para apagar algo, peça: “Ultron, esqueça que…”</p>
+    <form method="dialog"><button class="botao">Fechar</button></form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
